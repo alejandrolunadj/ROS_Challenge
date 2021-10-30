@@ -1,4 +1,3 @@
-
 import os
 import rospy
 import rospkg
@@ -18,11 +17,9 @@ from geometry_msgs.msg import Twist,Pose2D
 from std_srvs.srv import Empty as EmptyServiceCall
 
 from turtlesim.msg import Pose
-#from turtlesim.msg import Velocity
 from geometry_msgs.msg import Twist
 from cpp_pkg.srv import *
 
-#from teer_ros import *
 
 import roslib
 roslib.load_manifest('rqt_mypkg')
@@ -31,18 +28,6 @@ import actionlib
 
 from rqt_mypkg.msg import move_to_goalAction, move_to_goalGoal, move_to_goalResult
 
-from math import pow, atan2, sqrt
-
-robot_x = 0
-
-def callback_active():
-    rospy.loginfo("Action server is processing the goal")
-
-def callback_done(state, result):
-    rospy.loginfo("Action server is done. State: %s, result: %s" % (str(state), str(result)))
-
-def callback_feedback(feedback):
-    rospy.loginfo("Feedback:%s" % str(feedback))
 
 
 class MyPlugin(Plugin):
@@ -86,10 +71,13 @@ class MyPlugin(Plugin):
         self._widget.pushButton_Resume.clicked.connect(self.btn_resume)
         # Add widget to the user interface
         context.add_widget(self._widget)
-        self.target_publisher = rospy.Publisher('target', Pose2D, queue_size=10)
 
-	self.client = actionlib.SimpleActionClient('move_to_target', move_to_goalAction)
-	self.client.wait_for_server()
+
+        self.client = actionlib.SimpleActionClient('move_to_target', move_to_goalAction)
+        self.client.wait_for_server()
+        self.total_points = 0
+        self.current_point = 0
+        self.points= None
 
 
     def btn_open(self):
@@ -101,36 +89,49 @@ class MyPlugin(Plugin):
             data=f.read()
             f.close()
             try:
-                points = json.loads(data)
+                self.points = json.loads(data)
             except ValueError:
-                printf("invalid JSON file")
+                rospy.loginfo("Invalid JSON file")
                 return
         else:
             return
 
         rate = rospy.Rate(10)
+        self.total_points = len(self.points)
+        self.current_point = 0
+        rospy.loginfo("total points %d" % self.total_points)
+        self.send_target()
+        
 
-        for point in points:
-            print ("going to position %s, %s" %  (float(point["x"]) , float(point["y"])))
-            goal=move_to_goalGoal(float(point["x"]),float(point["y"]))
-            self.client.send_goal(goal)
-            self.client.wait_for_result(rospy.Duration.from_sec(5.0))
+
 
     def btn_reset(self):
-        print("button_reset gets clicked.")
+        self.total_points = 0
+        self.current_point = 0
+        self.client.cancel_all_goals()
         self.manual_commands_client("turtle1", "reset")
-        pass
+
+        rospy.wait_for_service('reset')
+        reset_simulator = rospy.ServiceProxy('reset', EmptyServiceCall)
+        reset_simulator()
+
+
 
     def btn_pause(self):
-        print("button_pause gets clicked.")
         self.manual_commands_client("turtle1", "pause")
 
     def btn_resume(self):
-        print("button_resume gets clicked.")
         self.manual_commands_client("turtle1", "resume")
 
+    def send_target(self):
+        rospy.loginfo("Target (%d) ==> %s, %s" %  (self.current_point, float(self.points[self.current_point]["x"]) , float(self.points[self.current_point]["y"])))
+        goal=move_to_goalGoal(float(self.points[self.current_point]["x"]) , float(self.points[self.current_point]["y"]))
+        self.client.send_goal(goal,active_cb=self.callback_active,feedback_cb=self.callback_feedback,done_cb=self.callback_done)
+        self.current_point += 1
+        
 
     def manual_commands_client(self, name, order):
+        rospy.loginfo("Sending command %s" %order)
         rospy.wait_for_service('manual_commands')
         try:
             manual_commands = rospy.ServiceProxy('manual_commands', ManualCommands)
@@ -138,7 +139,7 @@ class MyPlugin(Plugin):
             resp1 = manual_commands(name, order)
             return
         except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+            rospy.loginfo("Service call failed: %s"%e)
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here
@@ -158,4 +159,17 @@ class MyPlugin(Plugin):
         # Comment in to signal that the plugin has a way to configure
         # This will enable a setting button (gear icon) in each dock widget title bar
         # Usually used to open a modal configuration dialog
+    def callback_active(self):
+        rospy.loginfo("Action server is processing the goal")
+
+
+    def callback_done(self, state, result):
+        rospy.loginfo("Action server is done. State: %s, result: %s" % (str(state), str(result)))
+        if self.current_point < self.total_points:
+            self.send_target()
+
+
+    def callback_feedback(self, feedback):
+        rospy.loginfo("Feedback:%s" % str(feedback))
+
 

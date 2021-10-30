@@ -35,13 +35,15 @@ class Robot{
     ros::Subscriber currentPoseSub;
     ros::Subscriber targetPoseSub;
 
+    cpp_pkg::move_to_goalFeedback feedback;
+
     const double PI = 3.141592654;
     const double SF_L = 1.5; //speed factor linear
 
     const double SF_A = 3.5; //speed factor angular
 
     const double distanceTolerance = 0.1;
-    const double angleTolerance = 0.001; //0.01;
+    const double angleTolerance = 0.01; //0.01;
     bool isMoving = false;
     bool cleaner_mode = false;
     bool isFinish = false;
@@ -54,6 +56,25 @@ class Robot{
 
   public:
     geometry_msgs::Twist velCommand; // Linear and angular velocity in m/s 
+
+    Robot() : _as(node, "/move_to_target", boost::bind(&Robot::cb, this, _1), false){
+      
+      _as.start();
+      currentPoseSub =  node.subscribe("turtle1/pose", 0, &Robot::updatePose, this);
+
+      //targetPoseSub =  node.subscribe("target", 0, &Robot::updateTarget, this);
+      targetPoseSub =  node.subscribe("target", 0, &Robot::updateTarget, this, ros::TransportHints().tcpNoDelay());
+
+      velocityPub =  node.advertise<geometry_msgs::Twist>("turtle1/cmd_vel", 0);
+
+      feedbackPub = node.advertise<geometry_msgs::Pose2D>("feedback", 10);
+
+      service = node.advertiseService("manual_commands", &Robot::process, this);
+
+      //client = node.serviceClient<std_srvs::Empty>("/reset");
+      client = node.serviceClient<turtlesim::TeleportAbsolute>("/turtle1/teleport_absolute");
+
+    }
 
     void setup() {
       targetGoal.x = 5.54;
@@ -139,15 +160,19 @@ class Robot{
       if(isMoving && !isFinish){
         //ROS_INFO("Sending feedback ...");
         feedbackPub.publish(currentPos); //feedbak topic
+        feedback.x = currentPos.x;
+        feedback.y = currentPos.y;
         ros::spinOnce();
       }
     }
 
     void updateTarget(const geometry_msgs::Pose2D &targetPose) {
+      ROS_INFO("Goal received by topic");
       targetGoal.x = targetPose.x;
       targetGoal.y = targetPose.y;
       isMoving = true;
       isFinish = false;
+      ROS_INFO("Target is : %f %f", targetPose.x, targetPose.y);
     }
 
     void processTarget(){
@@ -157,31 +182,13 @@ class Robot{
         }
     }
 
-    Robot() : _as(node, "/move_to_target", boost::bind(&Robot::cb, this, _1), false){
-
-      _as.start();
-      currentPoseSub =  node.subscribe("turtle1/pose", 0, &Robot::updatePose, this);
-
-      //targetPoseSub =  node.subscribe("target", 0, &Robot::updateTarget, this);
-      targetPoseSub =  node.subscribe("target", 0, &Robot::updateTarget, this, ros::TransportHints().tcpNoDelay());
-
-      velocityPub =  node.advertise<geometry_msgs::Twist>("turtle1/cmd_vel", 0);
-
-      feedbackPub = node.advertise<geometry_msgs::Pose2D>("feedback", 10);
-
-      service = node.advertiseService("manual_commands", &Robot::process, this);
-
-      //client = node.serviceClient<std_srvs::Empty>("/reset");
-      client = node.serviceClient<turtlesim::TeleportAbsolute>("/turtle1/teleport_absolute");
-
-    }
 
     void cb(const cpp_pkg::move_to_goalGoalConstPtr &goal){
-      ROS_INFO("Goal received");
+      ROS_INFO("Goal received by action");
       geometry_msgs::Pose2D pose;
       pose.x=goal->x;
       pose.y=goal->y;
-
+      
       ROS_INFO("Target is : %f %f", pose.x, pose.y);
       updateTarget(pose);
 
@@ -200,11 +207,9 @@ class Robot{
           success = true;
           break;
         }
-
-        cpp_pkg::move_to_goalFeedback feedback;
-        feedback.x = 0;
-        feedback.y = 0;
-        _as.publishFeedback(feedback);
+        if(isMoving){
+          _as.publishFeedback(feedback);
+        }
         rate.sleep();
       }
       cpp_pkg::move_to_goalResult result;
@@ -257,9 +262,7 @@ int main(int argc, char **argv) {
   ros::Rate loop_rate(10);
 
   while (ros::ok()) {
-
     ros::spinOnce();
-
     robot.processTarget();
     loop_rate.sleep();
   }
