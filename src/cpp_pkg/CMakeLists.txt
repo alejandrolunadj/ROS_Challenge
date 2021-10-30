@@ -11,10 +11,13 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  message_generation
+  actionlib
+  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -47,31 +50,29 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+   FILES
+   Orders.msg
+)
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+   FILES
+   ManualCommands.srv
+)
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+add_action_files(
+  DIRECTORY action 
+  FILES move_to_goal.action
+)
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+   DEPENDENCIES
+   actionlib_msgs 
+   std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -93,6 +94,9 @@ find_package(catkin REQUIRED COMPONENTS
 #   cfg/DynReconf2.cfg
 # )
 
+find_package(catkin REQUIRED genmsg actionlib_msgs actionlib)
+
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -105,7 +109,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES cpp_pkg
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs message_runtime actionlib_msgs
 #  DEPENDS system_lib
 )
 
@@ -118,6 +122,7 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+#  ${Boost_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -215,7 +220,8 @@ target_link_libraries(move_to_goal ${catkin_LIBRARIES} )
 add_executable(sender src/sender.cpp)
 target_link_libraries(sender ${catkin_LIBRARIES} )
 
-
+add_executable(fb_listener src/fb_listener.cpp)
+target_link_libraries(fb_listener ${catkin_LIBRARIES} )
 
 
 

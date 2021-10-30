@@ -24,10 +24,12 @@ int main(int argc, char **argv) {
   ros::NodeHandle node;
 
   ros::Publisher targetPub =  node.advertise<geometry_msgs::Pose2D>("target", 0);
-
+  ros::Rate loop_rate(0.5);
   while (ros::ok()) {
     set_targetGoal();
     targetPub.publish(targetGoal);
+    ros::spinOnce();
+    loop_rate.sleep();
   }
 
   return 0;
