@@ -1,0 +1,17 @@
+<library path="src">
+  <class name="My Plugin" type="rqt_mypkg.my_module.MyPlugin" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A Python GUI for control the turtle.
+    </description>
+    <qtgui>
+      <group>
+        <label>Logging</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to logging.</statustip>
+      </group>
+      <label>Mi first Python Plugin</label>
+      <icon type="theme">system-help</icon>
+      <statustip>Great user interface to provide real value.</statustip>
+    </qtgui>
+  </class>
+</library>
