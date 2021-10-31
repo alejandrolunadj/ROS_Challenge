@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="js/eventemitter2.js"></script>
+  <script type="text/javascript" src="js/roslib.js"></script>
+  <script type="text/javascript" src="js/roslib.min.js"></script>
+  <script type="text/javascript" src="js/turtle.js"></script>
+  <script type="text/javascript" src="js/turtlesim.js"></script>
+
+<style>
+			.lblBox{
+        		width:159px ;
+        		border:  solid;
+				display: inline-block;
+    		}
+			#world {
+				border: 2px solid black;
+				width: 500;
+				height: 500;
+			}
+		</style>
+		<script>
+			var turtle_sim;
+			var my_listener;
+			var ros;
+			function onload() {
+				// connecting to ROS
+				ros = new ROSLIB.Ros();
+				ros.on('error', function(error) {
+					console.log(error);
+				});
+				// made a connection
+				ros.on('connection', function() {
+					console.log('Connection made', 'ws://localhost:9090');
+					// create turtlesim
+					var context = document.getElementById('world').getContext('2d');
+					turtle_sim = new TURTLESIMJS.TurtleSim({
+						ros			: ros,
+						context		: context,
+						keyControl	: true,
+					})
+					// create turtle
+					.spawnTurtle({name: 'turtle1'});
+
+					my_listener = new ROSLIB.Topic({
+						ros : ros,
+						name : '/turtle1/pose',
+						messageType : 'turtlesim/Pose' ,
+						info : false
+					});
+					my_listener.subscribe(function(message) {
+					    if(message){
+						document.getElementById('lblSpeed').innerHTML = Number(message.linear_velocity).toFixed(4) ;
+						document.getElementById('lblPoseX').innerHTML = Number(message.x).toFixed(4) ;
+						document.getElementById('lblPoseY').innerHTML = Number(message.y).toFixed(4) ;
+					    }
+					});				
+
+				});
+				// create a connection to the rosbridge WebSocket server
+				ros.connect('ws://localhost:9090');
+
+
+			}
+		</script>
+	</head>
+	<div  class="lblBox">
+		Speed=<label id="lblSpeed">0</label>
+	</div >
+	<div  class="lblBox">
+		Pose.x=<label id="lblPoseX">0</label>
+	</div >
+	<div  class="lblBox">
+		Pose.Y=<label id="lblPoseY">0</label>
+	</div >
+	<br>
+
+	<body onload="onload()">
+		<canvas id="world" width="500" height="500"></canvas>
+<script>
+</script>
+	</body>
+
+</html>
+

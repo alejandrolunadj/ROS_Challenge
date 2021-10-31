@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<title>Move turtle using joystick</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="w3.css">
+<script language="JavaScript" type="text/javascript" src="./js/jquery/jquery-3.4.1.slim.min.js"></script>
+  <script type="text/javascript" src="./js/roslib.min.js"></script>
+  <script type="text/javascript" src="./js/nipplejs.js"></script>
+  <script type="text/javascript" src="./view.js"></script>
+
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+<body class="w3-light-grey">
+
+<div class="w3-main" style="margin-left:10px;margin-top:43px;">
+
+  <header class="w3-container" style="padding-top:22px">
+    <h5><b><i class="fa fa-dashboard"></i> My Dashboard</b></h5>
+  </header>
+
+
+  <div class="w3-panel" >
+    <div class="w3-row-padding" style="margin:0 -16px">
+      <div class="w3-third">
+        <h5>Jostick</h5>
+        <div id="zone_joystick" style="position: relative;"></div>
+      </div>
+    </div>
+  </div>
+  <hr>
+    
+  <br>
+  <div class="w3-container w3-dark-grey w3-padding-32">
+    <div class="w3-row">
+      <div id="subs_names"  class="w3-container w3-third">
+        <h5 class="w3-bottombar w3-border-green">Value Names</h5>
+        <p>X from pose:</p>
+        <p>Y from pose:</p>
+       
+      </div>
+      <div class="w3-container w3-third">
+        <h5 id="subs_value" class="w3-bottombar w3-border-red">Values</h5>
+        <p><span id="x"></span></p>
+        
+        <span id="y"><p></p></span>
+      </div>
+      <div class="w3-container w3-third">
+        <h5 class="w3-bottombar w3-border-orange">Target</h5>
+        <canvas id="canvas1" width="490" height="520"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script type="text/javascript" src="./index.js"></script>
+</script>
+
+</body>
+</html>

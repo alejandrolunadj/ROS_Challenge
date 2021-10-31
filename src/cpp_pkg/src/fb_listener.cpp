@@ -4,7 +4,7 @@
 
 
 void feedBackCB(const geometry_msgs::Pose2D &feedbackPose){
-  ROS_INFO("Feddback position x=%f y=%f", feedbackPose.x, feedbackPose.y);
+  ROS_INFO("Feedback position x=%f y=%f", feedbackPose.x, feedbackPose.y);
 }
 
 int main(int argc, char **argv){
