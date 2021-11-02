@@ -1,0 +1,84 @@
+ROS commands
+
+
+
+To see the active topic list:
+
+	$ rostopic list
+
+
+To see the active topic list:
+
+	$ rosservice list
+
+
+To see the active action list:
+
+	$ rostopic list | grep -o -P '^.*(?=/feedback)'
+
+
+To reset the turtle:
+
+	$ rosservice call /reset
+
+
+To run turtlesim:
+
+	$ rosrun turtlesim turtlesim_node
+
+
+To move the turtle (example):
+
+	$ rosservice call /turtle1/teleport_absolute 3 4 1.572
+
+
+To teleoperate the turtle using arrows keys:
+
+	$ rosrun turtlesim turtle_teleop_key
+
+
+To see Nodes and Topics scheme
+
+	$ rosrun rqt_graph rqt_graph
+
+
+To run websocket bridge (only if use browser)
+
+	$ roslaunch rosbridge_server rosbridge_websocket.launch
+
+
+
+The following commands must be preceded with:
+
+	$ cd ~/catkin_ws/
+	
+	$ source devel/setup.bash
+
+
+
+	To run move_to_goal node:
+
+		$ rosrun cpp_pkg move_to_goal
+
+
+	To run sender node:
+
+		$ rosrun cpp_pkg sender
+
+
+	To run feedbak listener node:
+
+		$ rosrun cpp_pkg fb_listener
+
+
+	To run RQT GUI node:
+
+		$ rqt --standalone rqt_mypkg
+
+
+
+
+
+
+
+

@@ -1,4 +1,3 @@
-//#include <cstdlib>
 #include "ros/ros.h"
 #include "cpp_pkg/ManualCommands.h"
 #include "geometry_msgs/Twist.h"
@@ -79,6 +78,8 @@ class Robot{
     void setup() {
       targetGoal.x = 5.54;
       targetGoal.y = 5.54;
+      currentPos.x = targetGoal.x;
+      currentPos.y = targetGoal.y;
       velCommand.linear.x = 0.0;
       velCommand.linear.y = 0.0;
       velCommand.linear.z = 0.0;
@@ -213,8 +214,8 @@ class Robot{
         rate.sleep();
       }
       cpp_pkg::move_to_goalResult result;
-      result.x = 0;
-      result.y = 0;
+      result.x = currentPos.x;
+      result.y = currentPos.y;
       ROS_INFO("Send goal result to client");
 
       if (preempted){

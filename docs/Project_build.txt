@@ -1,0 +1,30 @@
+How to build the project
+
+First we must create our ROS project workspace and clone the sourcecode from the repository:
+
+Open a new terminal (this is important) and execute the following commands:
+
+	$ cd ~
+
+	$ git clone https://github.com/alejandrolunadj/ROS_Challenge catkin_ws
+
+	
+	
+	
+Now we will compile for the fist time using the following command:
+	
+	$ cd ~/catkin_ws
+	
+	$ catkin_make
+
+
+From now to compile we must do the followinng commands
+
+	$ cd ~/catkin_ws
+
+	$ catkin_make
+
+
+
+	
+	

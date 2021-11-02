@@ -1,0 +1,139 @@
+How to run each challenge point.
+
+All challenge points needs running roscore and turtlesim node, 
+so to begin you must first open a new terminal and execute:
+
+	$ roscore
+	
+	And then in another new terminal execute:
+	
+	$ rosrun turtlesim turtlesim_node
+	
+From now, with these running, we can run each challenge point.
+
+
+Point 1: 
+Create a C++ node to move the turtle to a goal using topics with standard Pose2D message.
+
+	To do it we must run the cpp node as follows:
+	
+	In a new terminal execute:
+		
+		$ cd ~/catkin_ws
+		
+		$ source ./devel/setup.bash
+		
+		$ rosrun cpp_pkg move_to_goal
+	
+	
+	In a new terminal execute:
+		
+		$ cd ~/catkin_ws
+
+		$ source ./devel/setup.bash
+	
+		$ rosrun cpp_pkg sender
+		
+		Now, the sender node will ask the x and y position to move the turtle.
+		For each "x,y" introduced, the node "sender" will publish the target to the 
+		node "move_to_goal" using Pose2D message and it will move the turtle.
+	
+	
+Point 2:	
+	Periodic feedback of turtle’s pose must be provided using the same message type as the goals.
+
+		To do it, keeping the previous nodes running, in a new termninal execute:
+		
+			$ cd ~/catkin_ws
+
+			$ source ./devel/setup.bash
+		
+			$ rosrun cpp_pkg fb_listener
+			
+		Now, come back to the "sender" terminal and enter "x,y" positions as you wish.
+		In the "fb_listener" terminal you can see the feedback positions sent by "move_to_goal" node using a topic.
+
+
+Point 3 and Point 4:
+	The motion of the turtle may be paused, resumed or reset by using a service.
+	Create an RQT Python UI to read a JSON file with a list of points that the
+	robot must follow. This UI must provide the option of pausing, resuming and
+	resetting the turtle’s motion too.
+
+		To do it, keeping the previous nodes running, in a new termninal execute:
+		
+			$ cd ~/catkin_ws
+
+			$ source ./devel/setup.bash
+		
+			$ rqt --standalone rqt_mypkg
+
+		Now, come back to the "sender" terminal and enter "x,y" positions as you wish.
+		When the turtle is moving, you can press in the GUI the buttons "pause", "resume" and "reset" as you wish.
+		To reset, pause and resume the movement, the GUI uses one service provided by the node "move_to_goal" with 
+		a custom message to indicate the action.
+		The "reset all" button does the same as "reset" but also resets the turtlesim using its "reset" service. 
+
+
+		Additionally:
+			The GUI are suscribed to the feedback position topic of "move_to_goal" node, so you can see 
+		the	position feedback in the GUI and in the "fb_listener" terminal at the same time, demostrating the 
+		"one to many" topic concept.
+			
+			The GUI are suscribed to the feedback position topic of "turtlesim" node too, so you can see 
+		the	turtlesim position feedback checking the checkbox "Only from turtlesim".
+	
+Regarding point 4 and Extra point 5:
+	Read a JSON file with a list of points that the robot must follow.
+	You can implement ROS actions to provide feedback from the turtle’s pose.
+
+		To do it, press the "open" button and select a .JSON file from the "~/catkin_ws/docs/JSON_files" folder.
+		The GUI will load the .JSON file and will use and action to indicate the target position 
+		and receiving the feedback position from the action server.
+		
+		Additionally:
+			The GUI validates the JSON file and every point, if it detects any error the process is aborted.
+				You can probe it by opening any file called  "points_errorX.JSON".
+			The "move_to_goal" node always sends the feedback position to the topic, even if the target 
+				is provided with an action. So, meanwhile the .JSON file is procesed, you can see the 
+				feedback position in the "fb_listener" terminal and in the GUI as an action feedback at the same time.
+			The GUI shows the feedback position indicating the source of it as follows:
+				Topic Feedback (Is the feedback sent by "move_to_goal" node using topic).
+				Action Feedback (Is the feedback sent by "move_to_goal" node using action).
+				Turtle Feedback (Is the feedback sent by "turtlesim" node using topic) (The checkbox must be checked).
+				
+
+Extra points 1 and 3: 
+	Show the pose of the robot in the browser using roslibjs.
+	Display the turtle’s speed and pose in the Web interface.
+
+		
+		To do it, keeping the previous nodes running, in a new termninal execute:
+		
+			$ roslaunch rosbridge_server rosbridge_websocket.launch
+			
+		In the GUI, press the button "reset all"
+		
+		In a new terminal execute:
+			
+			$ xdg-open ~/catkin_ws/src/web_pkg/index.html
+
+		Now, press the button "open" and select a .JSON file. 
+		Now, go to the "sender" terminal and enter "x,y" positions as you wish.
+		
+		
+Extra point 4: 
+	Modify the interface to be able to teleoperate the turtle (i.e. move the robot around arbitrarily).		
+		
+	To do it, set focus on the browser and use the arrows key to move the turtle.
+	In the GUI, check the the checkbox "only from turtlesim" to see the turtule feedback.
+		
+		
+	Additionally , keeping the previous nodes running, in a new termninal execute:
+	
+		$ xdg-open ~/catkin_ws/src/web_pkg2/index.html
+	
+	This is an experimental implementation using a virtual joystic to teleoperate the turtle. (Not finished yet).
+
+
+
